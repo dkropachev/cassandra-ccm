@@ -202,7 +202,7 @@ class SSHClient:
         command = " ".join("'{0}'".format(argument) for argument in command)
 
         # Execute the command and initialize for reading (close stdin/writes)
-        if not profile is None and not profile is "None":
+        if not profile is None and profile != "None":
             command = "source " + profile + ";" + command
         stdin, stdout, stderr = self.ssh.exec_command(command)
         stdin.channel.shutdown_write()
@@ -427,8 +427,7 @@ class RemoteOptionsParser():
         """
         Create the parser for the remote CCM operations allowed
         """
-        self.parser = argparse.ArgumentParser(description="Remote",
-                                              add_help=False)
+        self.parser = argparse.ArgumentParser(add_help=False)
 
         # Add the SSH arguments for the remote parser
         self.parser.add_argument(
@@ -516,5 +515,5 @@ class RemoteOptionsParser():
             # Try to extract argument description only, otherwise output the whole usage string
             remote_arguments_usage = chunks[2]
         # Remove any blank lines and return
-        return "Remote Options:" + os.linesep + \
+        return "Remote Usage:" + os.linesep + \
                os.linesep.join([s for s in remote_arguments_usage.splitlines() if s])
