@@ -51,18 +51,34 @@ jobs:
         run: |
           sudo ./setup.py install
           set -x
-          ccm_test() { for i in {1..9}; do ./ccm start && ./ccm remove && return 0 || echo retrying; sleep 20; done; echo "ccm start failed after 9 attempts"; exit 1; }
+
+          ccm_test() {
+            for i in {1..9}; do 
+              echo "Checking nc -z 127.0.0.1 7000"
+              while nc -z 127.0.0.1 7000 ; do echo . ; sleep 1 ; done
+              ./ccm start && ./ccm remove && return 0 || echo retrying
+              ./ccm stop || true
+              sleep 20
+            done
+            echo "ccm start failed after 9 attempts"
+            exit 1
+          }
           export -f ccm_test
           ./ccm create -h
-          ./ccm create test -v 5.0.3 -n1 --vnodes
+          ./ccm create test -v 5.0.3 -n1 --vnodes --quiet
           ccm_test
-          ./ccm create test --version='git:cassandra-5.0.3' -n1 --vnodes
+          ./ccm create test --version='git:cassandra-5.0.3' -n1 --vnodes --quiet
           ccm_test
-          ./ccm create test -v 6.8.54 -n1 --vnodes --dse
-          ccm_test
+          ./ccm create test -v 6.8.54 -n1 --vnodes --dse --quiet
+          ccm_test --dse
+
           # todo, when available
-          #./ccm create test -v 1.1.0 -n1 --vnodes --hcd
-          #ccm_test
+          #./ccm create test -v 1.1.0 -n1 --vnodes --hcd --quiet
+          #ccm_test --hcd
+
+          # test paramiko remote usage help
+          sudo pip install paramiko
+          ./ccm create -h
 
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v5
