@@ -28,7 +28,12 @@ import tarfile
 import tempfile
 from argparse import ArgumentError
 from distutils.version import LooseVersion
-from six.moves import urllib
+
+try:
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen, URLError
 
 from ccmlib import common, repository
 from ccmlib.cluster import Cluster
@@ -276,7 +281,7 @@ def download_dse_version(version, username, password, verbose=False):
         if os.path.exists(target_dir):
             rmdirs(target_dir)
         shutil.move(os.path.join(repository.__get_dir(), dir), target_dir)
-    except urllib.error.URLError as e:
+    except URLError as e:
         msg = "Invalid version %s" % version if url is None else "Invalid url %s" % url
         msg = msg + " (underlying error is: %s)" % str(e)
         raise ArgumentError(msg)
@@ -306,7 +311,7 @@ def download_opscenter_version(version, username, password, target_version, verb
         if os.path.exists(target_dir):
             rmdirs(target_dir)
         shutil.move(os.path.join(repository.__get_dir(), dir), target_dir)
-    except urllib.error.URLError as e:
+    except URLError as e:
         msg = "Invalid version {}".format(version) if url is None else "Invalid url {}".format(url)
         msg = msg + " (underlying error is: {})".format(str(e))
         raise ArgumentError(msg)

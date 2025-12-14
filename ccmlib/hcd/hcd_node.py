@@ -23,7 +23,11 @@ import shutil
 import yaml
 
 from distutils.version import LooseVersion
-from six.moves import urllib, xrange
+
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
 
 from ccmlib import common, node
 from ccmlib.node import Node
@@ -151,7 +155,7 @@ class HcdNode(Node):
         dirs = []
         for i in ['commitlogs', 'saved_caches', 'logs', 'bin', 'resources']:
             dirs.append(os.path.join(self.get_path(), i))
-        for x in xrange(0, self.cluster.data_dir_count):
+        for x in range(0, self.cluster.data_dir_count):
             dirs.append(os.path.join(self.get_path(), 'data{0}'.format(x)))
         return dirs
 

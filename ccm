@@ -21,7 +21,6 @@ import sys
 import warnings
 
 import pkg_resources
-from six import print_
 
 from ccmlib import common
 from ccmlib.cmds import cluster_cmds, node_cmds
@@ -34,26 +33,26 @@ def print_subcommand_usage(kind):
     for cmd_name in (cluster_cmds if kind.lower() == 'cluster' else node_cmds).commands():
         cmd = get_command(kind, cmd_name)
         if not cmd:
-            print_("Internal error, unknown command {0}".format(cmd_name))
+            print("Internal error, unknown command {0}".format(cmd_name))
             exit(1)
-        print_("  {0:14} {1}".format(cmd_name, cmd.description()))
+        print("  {0:14} {1}".format(cmd_name, cmd.description()))
 
 
 def print_global_usage():
-    print_("Usage:")
+    print("Usage:")
     remote_options = ""
     if PARAMIKO_IS_AVAILABLE:
         remote_options = " [remote_options]"
-    print_("  ccm" + remote_options + " <cluster_cmd> [options]")
-    print_("  ccm" + remote_options + " <node_name> <node_cmd> [options]")
+    print("  ccm" + remote_options + " <cluster_cmd> [options]")
+    print("  ccm" + remote_options + " <node_name> <node_cmd> [options]")
     if PARAMIKO_IS_AVAILABLE:
-        print_("")
-        print_(get_remote_usage())
+        print("")
+        print(get_remote_usage())
     print_("")
-    print_("Where <cluster_cmd> is one of")
+    print("Where <cluster_cmd> is one of")
     print_subcommand_usage('cluster')
     print_("")
-    print_("or <node_name> is the name of a node of the current cluster and <node_cmd> is one of")
+    print("or <node_name> is the name of a node of the current cluster and <node_cmd> is one of")
     print_subcommand_usage('node')
     exit(1)
 
@@ -64,7 +63,7 @@ for entry_point in pkg_resources.iter_entry_points(group='ccm_extension'):
 common.check_win_requirements()
 
 if len(sys.argv) <= 1:
-    print_("Missing arguments")
+    print("Missing arguments")
     print_global_usage()
 
 arg1 = sys.argv[1].lower()
@@ -73,12 +72,12 @@ arg1 = sys.argv[1].lower()
 # the appropriate type of subcommand. This is used by the bash completion script.
 if arg1 == 'show-cluster-cmds':
     for cmd_name in cluster_cmds.commands():
-        print_(cmd_name)
+        print(cmd_name)
     exit(1)
 
 if arg1 == 'show-node-cmds':
     for cmd_name in node_cmds.commands():
-        print_(cmd_name)
+        print(cmd_name)
     exit(1)
 
 # Attempt a remote execution (only occurs if remote options are valid and ssh_host is set)
@@ -95,7 +94,7 @@ if arg1 in cluster_cmds.commands():
     cmd_args = sys.argv[2:]
 else:
     if len(sys.argv) <= 2:
-        print_("Missing arguments")
+        print("Missing arguments")
         print_global_usage()
     kind = 'node'
     node = arg1
@@ -107,7 +106,7 @@ if os.getenv('CASSANDRA_HOME') is not None:
 
 cmd = get_command(kind, cmd)
 if not cmd:
-    print_("Unknown node or command: {0}".format(arg1))
+    print("Unknown node or command: {0}".format(arg1))
     exit(1)
 
 parser = cmd.get_parser()

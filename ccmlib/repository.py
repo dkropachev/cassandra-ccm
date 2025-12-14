@@ -32,18 +32,21 @@ import tempfile
 import time
 from distutils.version import LooseVersion  # pylint: disable=import-error, no-name-in-module
 
-from six import next, print_
-
 try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
 
+try:
+    from urllib.request import urlopen, build_opener, install_opener, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen, build_opener, install_opener, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm, URLError
+
 from ccmlib import common
 from ccmlib.common import (ArgumentError, CCMError,
                            update_java_version, get_default_path, get_jdk_version_int,
                            platform_binary, rmdirs, validate_install_dir)
-from six.moves import urllib
 
 
 ARCHIVE = "http://archive.apache.org/dist/cassandra"
@@ -144,7 +147,7 @@ def validate(path):
 
 
 def clone_development(git_repo, version, verbose=False, alias=False):
-    print_(git_repo, version)
+    print(git_repo, version)
     target_dir = directory_name(version)
     assert target_dir
     if 'github' in version:
@@ -268,7 +271,7 @@ def clone_development(git_repo, version, verbose=False, alias=False):
             rmdirs(target_dir)
             common.error("Deleted {} due to error".format(target_dir))
         except:
-            print_('Building C* version {version} failed. Attempted to delete {target_dir} '
+            print('Building C* version {version} failed. Attempted to delete {target_dir} '
                    'but failed. This will need to be manually deleted'.format(
                        version=version,
                        target_dir=target_dir
@@ -313,7 +316,7 @@ def download_version(version, url=None, verbose=False, binary=False):
         else:
             compile_version(version, target_dir, verbose=verbose)
 
-    except urllib.error.URLError as e:
+    except URLError as e:
         msg = "Invalid version {}".format(version) if url is None else "Invalid url {}".format(url)
         msg = msg + " (underlying error is: {})".format(str(e))
         raise ArgumentError(msg)
@@ -452,7 +455,7 @@ def get_tagged_version_numbers(series='stable'):
         # Stable and oldstable releases are just a number:
         tag_regex = re.compile('^refs/tags/cassandra-([0-9]+\.[0-9]+\.[0-9]+$)')
 
-    tag_url = urllib.request.urlopen(GITHUB_TAGS)
+    tag_url = urlopen(GITHUB_TAGS)
     for ref in (i.get('ref', '') for i in json.loads(tag_url.read())):
         m = tag_regex.match(ref)
         if m:
@@ -479,13 +482,13 @@ def get_tagged_version_numbers(series='stable'):
 
 def __download(url, target, username=None, password=None, show_progress=False):
     if username is not None:
-        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        password_mgr = HTTPPasswordMgrWithDefaultRealm()
         password_mgr.add_password(None, url, username, password)
-        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-        opener = urllib.request.build_opener(handler)
-        urllib.request.install_opener(opener)  # pylint: disable=E1121
+        handler = HTTPBasicAuthHandler(password_mgr)
+        opener = build_opener(handler)
+        install_opener(opener)  # pylint: disable=E1121
 
-    u = urllib.request.urlopen(url)
+    u = urlopen(url)
     f = open(target, 'wb')
     meta = u.info()
     file_size = int(meta.get("Content-Length"))
@@ -511,7 +514,7 @@ def __download(url, target, username=None, password=None, show_progress=False):
         if show_progress:
             status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
             status = chr(8) * (len(status) + 1) + status
-            print_(status, end='')
+            print(status, end='')
 
     f.close()
     u.close()

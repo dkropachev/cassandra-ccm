@@ -28,7 +28,6 @@ import platform
 import re
 import shutil
 import signal
-import six
 import socket
 import stat
 import subprocess
@@ -36,7 +35,6 @@ import sys
 import time
 import yaml
 from distutils.version import LooseVersion  #pylint: disable=import-error, no-name-in-module
-from six import print_
 
 from ccmlib import extension
 
@@ -477,7 +475,7 @@ def is_ps_unrestricted():
             p = subprocess.Popen(['powershell', 'Get-ExecutionPolicy'], stdout=subprocess.PIPE)
         # pylint: disable=E0602
         except WindowsError:
-            print_("ERROR: Could not find powershell. Is it in your path?")
+            print("ERROR: Could not find powershell. Is it in your path?")
         if "Unrestricted" in str(p.communicate()[0]):
             return True
         else:
@@ -687,7 +685,7 @@ def copy_file(src_file, dst_file):
     try:
         shutil.copy2(src_file, dst_file)
     except (IOError, shutil.Error) as e:
-        print_(str(e), file=sys.stderr)
+        print(str(e), file=sys.stderr)
         exit(1)
 
 
@@ -703,7 +701,7 @@ def get_version_from_build(install_dir=None, node_path=None, cassandra=False):
     DEPRECATED: Use Node.get_version_from_build instead.
     """
     if not hasattr(get_version_from_build, "_deprecation_warned"):
-        print_("[DEPRECATION WARNING] ccmlib.common.get_version_from_build is deprecated, use ccmlib.Node.get_version_from_build instead", file=sys.stderr)
+        print("[DEPRECATION WARNING] ccmlib.common.get_version_from_build is deprecated, use ccmlib.Node.get_version_from_build instead", file=sys.stderr)
         get_version_from_build._deprecation_warned = True
     if install_dir:
         return extension.get_cluster_class(install_dir).getNodeClass().get_version_from_build(install_dir, node_path, cassandra)
@@ -1010,14 +1008,6 @@ def merge_configuration(original, changes, delete_empty=True, delete_always=Fals
                 new[k] = new_value
 
     return new
-
-
-def is_int_not_bool(obj):
-    return isinstance(obj, six.integer_types) and not isinstance(obj, bool)
-
-
-def is_intlike(obj):
-    return isinstance(obj, six.integer_types)
 
 
 def wait_for_any_log(nodes, pattern, timeout, filename='system.log', marks=None):
